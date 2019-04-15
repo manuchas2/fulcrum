@@ -1,0 +1,10 @@
+- name: "create channels"
+  include_role:
+    name: dlt_component
+  vars:
+    component_name: "create-{{ item.key }}"
+    component_config: "{{ item.value['config'] }}"
+    platform: "hyperledger-fabric"
+    type: "create_channel_job"
+  loop: "{{ dlt['hyperledger-fabric']['channels'] | default({}) | dict2items }}"
+  when: "item.value['config']['creator'] is defined"

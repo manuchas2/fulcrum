@@ -1,0 +1,517 @@
+dlt:
+  hyperledger-fabric:
+    chaincodes:
+      cc:
+        config:
+          name: cc
+          version: 1.0
+          peers:
+            - name: peer0-org1-example-com
+              repository:
+                hostname: innersource.accenture.com
+                url: ssh://git@innersource.accenture.com/dlta/dlt-ansible.git
+                branch: master
+                path: chaincodes/chaincode_example02
+                gitprivatekeyvaultpath: secret/credentials/org1-example-com/git?ssh-key
+            - name: peer1-org1-example-com
+              repository:
+                hostname: innersource.accenture.com
+                url: ssh://git@innersource.accenture.com/dlta/dlt-ansible.git
+                branch: master
+                path: chaincodes/chaincode_example02
+                gitprivatekeyvaultpath: secret/credentials/org1-example-com/git?ssh-key
+            - name: peer0-org2-example-com
+              repository:
+                hostname: innersource.accenture.com
+                url: ssh://git@innersource.accenture.com/dlta/dlt-ansible.git
+                branch: master
+                path: chaincodes/chaincode_example02
+                gitprivatekeyvaultpath: secret/credentials/org2-example-com/git?ssh-key
+            - name: peer1-org2-example-com
+              repository:
+                hostname: innersource.accenture.com
+                url: ssh://git@innersource.accenture.com/dlta/dlt-ansible.git
+                branch: master
+                path: chaincodes/chaincode_example02
+                gitprivatekeyvaultpath: secret/credentials/org2-example-com/git?ssh-key
+
+          orderer:
+            local: orderer-example-com
+          channels:
+            - name: mychannel
+              instantiator: peer0-org1-example-com
+              instantiationargs: '"init","a","200","b","400"'
+    channels:
+       mychannel:
+        config:
+          creator: peer0-org1-example-com
+          name: mychannel
+          peers:
+            - peer0-org1-example-com
+            - peer1-org1-example-com
+            - peer0-org2-example-com
+            - peer1-org2-example-com
+          orderer:
+            local: orderer-example-com
+          channeltx: |-
+            CtcCChcKFQgCGgYIq4244QUiCW15Y2hhbm5lbBK7Agq4AgoJbXljaGFubmVsEjsSKQoLQXBwbGlj
+            YXRpb24SGhILCgdPcmcyTVNQEgASCwoHT3JnMU1TUBIAGg4KCkNvbnNvcnRpdW0SABrtARLGAQoL
+            QXBwbGljYXRpb24StgEIARILCgdPcmcyTVNQEgASCwoHT3JnMU1TUBIAGiQKDENhcGFiaWxpdGll
+            cxIUEgoKCAoEVjFfMRIAGgZBZG1pbnMiIgoGQWRtaW5zEhgSDggDEgoKBkFkbWlucxACGgZBZG1p
+            bnMiIgoHUmVhZGVycxIXEg0IAxIJCgdSZWFkZXJzGgZBZG1pbnMiIgoHV3JpdGVycxIXEg0IAxIJ
+            CgdXcml0ZXJzGgZBZG1pbnMqBkFkbWlucxoiCgpDb25zb3J0aXVtEhQSEgoQU2FtcGxlQ29uc29y
+            dGl1bQ==
+    cas:
+      ca-example-com:
+        # Configuration values for the CA server
+        config:
+          metadata:
+            namespace: example-com
+          server:
+            name: ca
+            tlsstatus: true
+            admin: orderer-admin
+          storage:
+            storageclassname: standard
+            storagesize: 1Gi
+          vault:
+            role: vault-role
+            address: http://Vault-884963190.eu-west-1.elb.amazonaws.com
+            authpath: kube-cluster-orderer
+            secretcert: secret/crypto/ordererOrganizations/example-com/ca?ca.example-com-cert.pem
+            secretkey: secret/crypto/ordererOrganizations/example-com/ca?example-com-CA.key
+            secretadminpass: secret/credentials/example-com/ca/orderer?user
+            serviceaccountname: vault-auth
+            imagesecretname: regcred
+          service:
+            servicetype: NodePort
+      ca-org1-example-com:
+        # Configuration values for the CA server
+        config:
+          metadata:
+            namespace: org1-example-com
+          server:
+            name: ca
+            tlsstatus: true
+            admin: org1-admin
+          storage:
+            storageclassname: standard
+            storagesize: 1Gi
+          vault:
+            role: vault-role
+            address: http://Vault-884963190.eu-west-1.elb.amazonaws.com
+            authpath: kube-cluster-org1
+            secretcert: secret/crypto/peerOrganizations/org1-example-com/ca?ca.org1-example-com-cert.pem
+            secretkey: secret/crypto/peerOrganizations/org1-example-com/ca?org1-example-com-CA.key
+            secretadminpass: secret/credentials/org1-example-com/ca/org1?user
+            serviceaccountname: vault-auth
+            imagesecretname: regcred
+          service:
+            servicetype: NodePort
+      ca-org2-example-com:
+        # Configuration values for the CA server
+        config:
+          metadata:
+            namespace: org2-example-com
+          server:
+            name: ca
+            tlsstatus: true
+            admin: org2-admin
+          storage:
+            storageclassname: standard
+            storagesize: 1Gi
+          vault:
+            role: vault-role
+            address: http://Vault-884963190.eu-west-1.elb.amazonaws.com
+            authpath: kube-cluster-org2
+            secretcert: secret/crypto/peerOrganizations/org2-example-com/ca?ca.org2-example-com-cert.pem
+            secretkey: secret/crypto/peerOrganizations/org2-example-com/ca?org2-example-com-CA.key
+            secretadminpass: secret/credentials/org2-example-com/ca/org2?user
+            serviceaccountname: vault-auth
+            imagesecretname: regcred
+          service:
+            servicetype: NodePort
+    peers:
+      # Should be a name without '.'
+      peer0-org1-example-com:
+        config:
+          metadata:
+            namespace: org1-example-com
+          peer:
+            name: peer0
+            gossippeeraddress: peer1.org1-example-com.svc.cluster.local:7051
+            localmspid: Org1MSP
+            loglevel: info
+            tlsstatus: true
+            couchdb:
+              username: org1-user
+          storage:
+            peer:
+              storageclassname: standard
+              storagesize: 1Gi
+            couchdb:
+              storageclassname: standard
+              storagesize: 1Gi
+          vault:
+            role: vault-role
+            address: http://Vault-884963190.eu-west-1.elb.amazonaws.com
+            authpath: kube-cluster-org1
+            secretprefix: secret/crypto/peerOrganizations/org1-example-com/peers/peer0.org1-example-com
+            adminsecretprefix: secret/crypto/peerOrganizations/org1-example-com/users/admin
+            orderersecretprefix: secret/crypto/peerOrganizations/org1-example-com/orderer
+            secretcouchdbpass: secret/credentials/org1-example-com/couchdb/org1?user
+            serviceaccountname: vault-auth
+            imagesecretname: regcred
+          service:
+            servicetype: NodePort
+            ports:
+              grpc:
+                nodeport: 30001
+              events:
+                nodeport: 30002
+              couchdb:
+                nodeport: 30003
+      # Should be a name without '.'
+      peer1-org1-example-com:
+        config:
+          metadata:
+            namespace: org1-example-com
+          peer:
+            name: peer1
+            gossippeeraddress: peer0.org1-example-com.svc.cluster.local:7051
+            localmspid: Org1MSP
+            loglevel: info
+            tlsstatus: true
+            couchdb:
+              username: org1-user
+          storage:
+            peer:
+              storageclassname: standard
+              storagesize: 1Gi
+            couchdb:
+              storageclassname: standard
+              storagesize: 1Gi
+          vault:
+            role: vault-role
+            address: http://Vault-884963190.eu-west-1.elb.amazonaws.com
+            authpath: kube-cluster-org1
+            secretprefix: secret/crypto/peerOrganizations/org1-example-com/peers/peer1.org1-example-com
+            adminsecretprefix: secret/crypto/peerOrganizations/org1-example-com/users/admin
+            orderersecretprefix: secret/crypto/peerOrganizations/org1-example-com/orderer
+            secretcouchdbpass: secret/credentials/org1-example-com/couchdb/org1?user
+            serviceaccountname: vault-auth
+            imagesecretname: regcred
+          service:
+            servicetype: NodePort
+            ports:
+              grpc:
+                nodeport: 30004
+              events:
+                nodeport: 30005
+              couchdb:
+                nodeport: 30006
+      peer0-org2-example-com:
+        # Configuration values for the peer node
+        config:
+          metadata:
+            namespace: org2-example-com
+          peer:
+            name: peer0
+            gossippeeraddress: peer1.org2-example-com.svc.cluster.local:7051
+            localmspid: Org2MSP
+            loglevel: info
+            tlsstatus: true
+            couchdb:
+              username: org2-user
+          storage:
+            peer:
+              storageclassname: standard
+              storagesize: 1Gi
+            couchdb:
+              storageclassname: standard
+              storagesize: 1Gi
+          vault:
+            role: vault-role
+            address: http://Vault-884963190.eu-west-1.elb.amazonaws.com
+            authpath: kube-cluster-org2
+            secretprefix: secret/crypto/peerOrganizations/org2-example-com/peers/peer0.org2-example-com
+            adminsecretprefix: secret/crypto/peerOrganizations/org2-example-com/users/admin
+            orderersecretprefix: secret/crypto/peerOrganizations/org2-example-com/orderer
+            secretcouchdbpass: secret/credentials/org2-example-com/couchdb/org2?user
+            serviceaccountname: vault-auth
+            imagesecretname: regcred
+          service:
+            servicetype: NodePort
+            ports:
+              grpc:
+                nodeport: 31001
+              events:
+                nodeport: 31002
+              couchdb:
+                nodeport: 31003
+        # Should be a name without '.'
+      peer1-org2-example-com:
+        # Configuration values for the peer node
+        config:
+          metadata:
+            namespace: org2-example-com
+          peer:
+            name: peer1
+            gossippeeraddress: peer0.org2-example-com.svc.cluster.local:7051
+            localmspid: Org2MSP
+            loglevel: info
+            tlsstatus: true
+            couchdb:
+              username: org2-user
+          storage:
+            peer:
+              storageclassname: standard
+              storagesize: 1Gi
+            couchdb:
+              storageclassname: standard
+              storagesize: 1Gi
+          vault:
+            role: vault-role
+            address: http://Vault-884963190.eu-west-1.elb.amazonaws.com
+            authpath: kube-cluster-org2
+            secretprefix: secret/crypto/peerOrganizations/org2-example-com/peers/peer1.org2-example-com
+            adminsecretprefix: secret/crypto/peerOrganizations/org2-example-com/users/admin
+            orderersecretprefix: secret/crypto/peerOrganizations/org2-example-com/orderer
+            secretcouchdbpass: secret/credentials/org2-example-com/couchdb/org2?user
+            serviceaccountname: vault-auth
+            imagesecretname: regcred
+          service:
+            servicetype: NodePort
+            ports:
+              grpc:
+                nodeport: 31004
+              events:
+                nodeport: 31005
+              couchdb:
+                nodeport: 31006
+    zkkafka:
+      # Should be a name without '.'
+      zkkafka-example-com:
+        # Configuration values for the zk-kafka cluster
+        config:
+          metadata:
+            namespace: example-com
+          storage:
+            storagesize: 1Gi
+            storageclassname: standard
+          kafka:
+            name: kafka
+            brokerservicename: broker
+            replicas: 4
+          zookeeper:
+            name: zookeeper
+            peerservicename: zoo
+            replicas: 3
+            readinessthreshold: 4
+            readinesscheckinterval: 5
+    orderers:
+      # Should be a name without '.'
+      orderer-example-com:
+        # Configuration values for the orderer node
+        config:
+          metadata:
+            namespace: example-com
+          orderer:
+            name: orderer
+            loglevel: info
+            localmspid: OrdererMSP
+            tlsstatus: true
+          storage:
+            storageclassname: standard
+            storagesize: 1Gi
+          service:
+            servicetype: NodePort
+            ports:
+              grpc:
+                nodeport: 32001
+          vault:
+            address: http://Vault-884963190.eu-west-1.elb.amazonaws.com
+            role: vault-role
+            authpath: kube-cluster-orderer
+            secretprefix: secret/crypto/ordererOrganizations/example-com/orderers/orderer.example-com
+            imagesecretname: regcred
+            serviceaccountname: vault-auth
+          kafka:
+            readinesscheckinterval: 5
+            readinessthreshold: 20
+            cluster: zkkafka-example-com
+          genesis: |- 
+            CiIaINDbw74SUziL5tlYSB+PD3JjAc2zh1mSQkXWcrlh8fhqEt9MCtxMCtlMCnkKWwgBEAEaBgir
+            jbjhBSILdGVzdGNoYWluaWQqQGRhYjMwN2JjZGU2YWM2NzNhZDU0MmNlZjkyMjlkNzFhYmFlYTQz
+            ZmM0YzJjNmMyMGRlOTIyOWI4ODEwZjAxNmUSGhIYRn5TIY+QyzcH2Ki2ws9Sc5VO+k7REnB+EttL
+            CthLEtVLEsIaCgdPcmRlcmVyErYaEvkVCgpPcmRlcmVyT3JnEuoVGr8UCgNNU1AStxQSrBQSqRQK
+            Ck9yZGVyZXJNU1AS8QUtLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KTUlJQ0FEQ0NBYVdnQXdJ
+            QkFnSUpBTkttbEJNYXBFS3VNQW9HQ0NxR1NNNDlCQU1DTUdNeEN6QUpCZ05WQkFZVApBa2xPTVJR
+            d0VnWURWUVFJREF0TllXaGhjbUZ6YUhSeVlURVBNQTBHQTFVRUJ3d0dUWFZ0WW1GcE1SUXdFZ1lE
+            ClZRUUtEQXRsZUdGdGNHeGxMV052YlRFWE1CVUdBMVVFQXd3T1kyRXVaWGhoYlhCc1pTMWpiMjB3
+            SGhjTk1Ua3cKTVRBek1USTBNREk1V2hjTk1qRXhNREl6TVRJME1ESTVXakJqTVFzd0NRWURWUVFH
+            RXdKSlRqRVVNQklHQTFVRQpDQXdMVFdGb1lYSmhjMmgwY21FeER6QU5CZ05WQkFjTUJrMTFiV0po
+            YVRFVU1CSUdBMVVFQ2d3TFpYaGhiWEJzClpTMWpiMjB4RnpBVkJnTlZCQU1NRG1OaExtVjRZVzF3
+            YkdVdFkyOXRNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkkKemowREFRY0RRZ0FFUnJTWkQ4N0QxTUZC
+            UG1zZUdocVJ0Q20xd1krM2k5ZW02Y3EvZUtUYlpUSjhUZ1cwRlhkawpRQWZuZUxSakdCQU5PQXNs
+            Sm5RL1FFelN4eXh1WUxJdGJxTkNNRUF3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFPCkJnTlZIUThC
+            QWY4RUJBTUNBYVl3SFFZRFZSME9CQllFRkhYSlVQVGJ3U2M3U3p2bHFPTGx2TjA2ZkRKRE1Bb0cK
+            Q0NxR1NNNDlCQU1DQTBrQU1FWUNJUUR4aFFLWFF5ajVDaGx0ckNwV1lnUVozTVFPT214Q2Z6alRG
+            OWRFZVdlNwphQUloQUtEZUVtNmdWOTNXYlg1NW55djdjK0V4MGpjakpPN0hhcWtCRU5pcWVDREsK
+            LS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQoioggtLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0K
+            TUlJQzRUQ0NBb2VnQXdJQkFnSVVLNEVOMWx1cXUvN0RRL1VmY3J5TW9oeWFIQzh3Q2dZSUtvWkl6
+            ajBFQXdJdwpZekVMTUFrR0ExVUVCaE1DU1U0eEZEQVNCZ05WQkFnTUMwMWhhR0Z5WVhOb2RISmhN
+            UTh3RFFZRFZRUUhEQVpOCmRXMWlZV2t4RkRBU0JnTlZCQW9NQzJWNFlXMXdiR1V0WTI5dE1SY3dG
+            UVlEVlFRRERBNWpZUzVsZUdGdGNHeGwKTFdOdmJUQWVGdzB4T1RBeE1ETXhNalE1TURCYUZ3MHlN
+            REF4TURNeE1qVTBNREJhTUdreEN6QUpCZ05WQkFZVApBbFZUTVJjd0ZRWURWUVFJRXc1T2IzSjBh
+            Q0JEWVhKdmJHbHVZVEVVTUJJR0ExVUVDaE1MU0hsd1pYSnNaV1JuClpYSXhEekFOQmdOVkJBc1RC
+            bU5zYVdWdWRERWFNQmdHQTFVRUF3d1JRV1J0YVc1QVpYaGhiWEJzWlMxamIyMHcKV1RBVEJnY3Fo
+            a2pPUFFJQkJnZ3Foa2pPUFFNQkJ3TkNBQVRSOFExT25ZdVN1bGJJekJBNW14ZU1td1dFRld4UQpl
+            cmdnSDEzTWlqS25GZCt0SVlxaWFmemxRQ09lQjZpRTVpODE5OXZydG9ucnkvb3RhM0xGVXRIS280
+            SUJFVENDCkFRMHdEZ1lEVlIwUEFRSC9CQVFEQWdlQU1Bd0dBMVVkRXdFQi93UUNNQUF3SFFZRFZS
+            ME9CQllFRkNkWHFIZW4KMG5zWld6aGpqSkovZS9kOTE4Z0pNQjhHQTFVZEl3UVlNQmFBRkhYSlVQ
+            VGJ3U2M3U3p2bHFPTGx2TjA2ZkRKRApNQ1FHQTFVZEVRUWRNQnVDR1dOaExYUnZiMnh6TFRnMFky
+            TTVOVGM0WkRZdFl6Vm5lbTR3Z1lZR0NDb0RCQVVHCkJ3Z0JCSHA3SW1GMGRISnpJanA3SW1GaVlX
+            TXVhVzVwZENJNkluUnlkV1VpTENKaFpHMXBiaUk2SW5SeWRXVWkKTENKb1ppNUJabVpwYkdsaGRH
+            bHZiaUk2SWlJc0ltaG1Ma1Z1Y205c2JHMWxiblJKUkNJNklrRmtiV2x1UUdWNApZVzF3YkdVdFky
+            OXRJaXdpYUdZdVZIbHdaU0k2SW1Oc2FXVnVkQ0o5ZlRBS0JnZ3Foa2pPUFFRREFnTklBREJGCkFp
+            RUF3N3R4M2Q1ZUptMEpCMVowWm44enZpSkRUNU45ZHdDM3VodXNrV0w5cFU0Q0lCdDVVaUQvMk5o
+            Q09Ua0EKOTBzQkplSElpdjgwNk1pNHR0WHlSZXA2dHNxSQotLS0tLUVORCBDRVJUSUZJQ0FURS0t
+            LS0tCkIOCgRTSEEyEgZTSEEyNTZK8QUtLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KTUlJQ0FE
+            Q0NBYVdnQXdJQkFnSUpBTkttbEJNYXBFS3VNQW9HQ0NxR1NNNDlCQU1DTUdNeEN6QUpCZ05WQkFZ
+            VApBa2xPTVJRd0VnWURWUVFJREF0TllXaGhjbUZ6YUhSeVlURVBNQTBHQTFVRUJ3d0dUWFZ0WW1G
+            cE1SUXdFZ1lEClZRUUtEQXRsZUdGdGNHeGxMV052YlRFWE1CVUdBMVVFQXd3T1kyRXVaWGhoYlhC
+            c1pTMWpiMjB3SGhjTk1Ua3cKTVRBek1USTBNREk1V2hjTk1qRXhNREl6TVRJME1ESTVXakJqTVFz
+            d0NRWURWUVFHRXdKSlRqRVVNQklHQTFVRQpDQXdMVFdGb1lYSmhjMmgwY21FeER6QU5CZ05WQkFj
+            TUJrMTFiV0poYVRFVU1CSUdBMVVFQ2d3TFpYaGhiWEJzClpTMWpiMjB4RnpBVkJnTlZCQU1NRG1O
+            aExtVjRZVzF3YkdVdFkyOXRNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkkKemowREFRY0RRZ0FFUnJT
+            WkQ4N0QxTUZCUG1zZUdocVJ0Q20xd1krM2k5ZW02Y3EvZUtUYlpUSjhUZ1cwRlhkawpRQWZuZUxS
+            akdCQU5PQXNsSm5RL1FFelN4eXh1WUxJdGJxTkNNRUF3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFP
+            CkJnTlZIUThCQWY4RUJBTUNBYVl3SFFZRFZSME9CQllFRkhYSlVQVGJ3U2M3U3p2bHFPTGx2TjA2
+            ZkRKRE1Bb0cKQ0NxR1NNNDlCQU1DQTBrQU1FWUNJUUR4aFFLWFF5ajVDaGx0ckNwV1lnUVozTVFP
+            T214Q2Z6alRGOWRFZVdlNwphQUloQUtEZUVtNmdWOTNXYlg1NW55djdjK0V4MGpjakpPN0hhcWtC
+            RU5pcWVDREsKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQoaBkFkbWlucyI0CgZBZG1pbnMSKhIg
+            CAESHBIIEgYIARICCAAaEBIOCgpPcmRlcmVyTVNQEAEaBkFkbWlucyIzCgdSZWFkZXJzEigSHggB
+            EhoSCBIGCAESAggAGg4SDAoKT3JkZXJlck1TUBoGQWRtaW5zIjMKB1dyaXRlcnMSKBIeCAESGhII
+            EgYIARICCAAaDhIMCgpPcmRlcmVyTVNQGgZBZG1pbnMqBkFkbWlucxoeCgxCYXRjaFRpbWVvdXQS
+            DhIECgIycxoGQWRtaW5zGh8KE0NoYW5uZWxSZXN0cmljdGlvbnMSCBoGQWRtaW5zGiQKDENhcGFi
+            aWxpdGllcxIUEgoKCAoEVjFfMRIAGgZBZG1pbnMa6AEKDEthZmthQnJva2VycxLXARLMAQoxa2Fm
+            a2EtMC5icm9rZXIuZXhhbXBsZS1jb20uc3ZjLmNsdXN0ZXIubG9jYWw6OTA5Mgoxa2Fma2EtMS5i
+            cm9rZXIuZXhhbXBsZS1jb20uc3ZjLmNsdXN0ZXIubG9jYWw6OTA5Mgoxa2Fma2EtMi5icm9rZXIu
+            ZXhhbXBsZS1jb20uc3ZjLmNsdXN0ZXIubG9jYWw6OTA5Mgoxa2Fma2EtMy5icm9rZXIuZXhhbXBs
+            ZS1jb20uc3ZjLmNsdXN0ZXIubG9jYWw6OTA5MhoGQWRtaW5zGiIKDUNvbnNlbnN1c1R5cGUSERIH
+            CgVrYWZrYRoGQWRtaW5zGiIKCUJhdGNoU2l6ZRIVEgsIChCAgMAxGICAIBoGQWRtaW5zIiIKB1dy
+            aXRlcnMSFxINCAMSCQoHV3JpdGVycxoGQWRtaW5zIioKD0Jsb2NrVmFsaWRhdGlvbhIXEg0IAxIJ
+            CgdXcml0ZXJzGgZBZG1pbnMiIgoGQWRtaW5zEhgSDggDEgoKBkFkbWlucxACGgZBZG1pbnMiIgoH
+            UmVhZGVycxIXEg0IAxIJCgdSZWFkZXJzGgZBZG1pbnMqBkFkbWlucxLRLgoLQ29uc29ydGl1bXMS
+            wS4S9i0KEFNhbXBsZUNvbnNvcnRpdW0S4S0SwBYKB09yZzFNU1AStBYakhUKA01TUBKKFRL/FBL8
+            FAoHT3JnMU1TUBKOBi0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLQpNSUlDRXpDQ0FibWdBd0lC
+            QWdJSkFNcXBEcXFhbXpER01Bb0dDQ3FHU000OUJBTUNNRzB4Q3pBSkJnTlZCQVlUCkFrbE9NUlF3
+            RWdZRFZRUUlEQXROWVdoaGNtRnphSFJ5WVRFUE1BMEdBMVVFQnd3R1RYVnRZbUZwTVJrd0Z3WUQK
+            VlFRS0RCQnZjbWN4TFdWNFlXMXdiR1V0WTI5dE1Sd3dHZ1lEVlFRRERCTmpZUzV2Y21jeExXVjRZ
+            VzF3YkdVdApZMjl0TUI0WERURTVNREV3TXpFeU5EQXdNRm9YRFRJeE1UQXlNekV5TkRBd01Gb3di
+            VEVMTUFrR0ExVUVCaE1DClNVNHhGREFTQmdOVkJBZ01DMDFoYUdGeVlYTm9kSEpoTVE4d0RRWURW
+            UVFIREFaTmRXMWlZV2t4R1RBWEJnTlYKQkFvTUVHOXlaekV0WlhoaGJYQnNaUzFqYjIweEhEQWFC
+            Z05WQkFNTUUyTmhMbTl5WnpFdFpYaGhiWEJzWlMxagpiMjB3V1RBVEJnY3Foa2pPUFFJQkJnZ3Fo
+            a2pPUFFNQkJ3TkNBQVNYVEsxcXNxRVl5aEZBeDBvRHdEMXZNL3BOCitoaHI0d2NJRmtxYWNtSzRZ
+            ZUxaTEpFWDlXUlRFWmNva2tXUWgxc2Y2TGxCNmowYWJRekxtWWl5ZmRabm8wSXcKUURBUEJnTlZI
+            Uk1CQWY4RUJUQURBUUgvTUE0R0ExVWREd0VCL3dRRUF3SUJwakFkQmdOVkhRNEVGZ1FVNVA4MgpR
+            bkdDVlI5UUJxbmxwOWR3UHZXeE1Da3dDZ1lJS29aSXpqMEVBd0lEU0FBd1JRSWdOZTRxMWRORTVO
+            aTlVQWhTCkpkeW5qa0h4MmRiMmZON3dmSEpEc2ErRExlNENJUUMrYisyWi80ekpDTy9YQXljVm5L
+            VDlHZHhoR2o5UDMrWWUKRkEyY01hZW02QT09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0KIr4I
+            LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM5VENDQXB1Z0F3SUJBZ0lVZjNuTnVYcFgy
+            VzNUVlFtNXNsMTJWcmU1dEE4d0NnWUlLb1pJemowRUF3SXcKYlRFTE1Ba0dBMVVFQmhNQ1NVNHhG
+            REFTQmdOVkJBZ01DMDFoYUdGeVlYTm9kSEpoTVE4d0RRWURWUVFIREFaTgpkVzFpWVdreEdUQVhC
+            Z05WQkFvTUVHOXlaekV0WlhoaGJYQnNaUzFqYjIweEhEQWFCZ05WQkFNTUUyTmhMbTl5Clp6RXRa
+            WGhoYlhCc1pTMWpiMjB3SGhjTk1Ua3dNVEF6TVRJME9EQXdXaGNOTWpBd01UQXpNVEkxTXpBd1dq
+            QnUKTVFzd0NRWURWUVFHRXdKVlV6RVhNQlVHQTFVRUNCTU9UbTl5ZEdnZ1EyRnliMnhwYm1FeEZE
+            QVNCZ05WQkFvVApDMGg1Y0dWeWJHVmtaMlZ5TVE4d0RRWURWUVFMRXdaamJHbGxiblF4SHpBZEJn
+            TlZCQU1NRmtGa2JXbHVRRzl5Clp6RXRaWGhoYlhCc1pTMWpiMjB3V1RBVEJnY3Foa2pPUFFJQkJn
+            Z3Foa2pPUFFNQkJ3TkNBQVFVUWMzTUx5SVkKeXE0UWdyUm1CeHoyYlFkblQwdlVhZDNySFc0d0JD
+            aHNma3FuWHJkYlNCUHZuSHBpMkJWMTExTFdYL015VEpPagpjMUdzZlJKZ09MbURvNElCRmpDQ0FS
+            SXdEZ1lEVlIwUEFRSC9CQVFEQWdlQU1Bd0dBMVVkRXdFQi93UUNNQUF3CkhRWURWUjBPQkJZRUZM
+            SUhsbFhRRXZMdjg2N3M0VDFRSHE5b1lBY3RNQjhHQTFVZEl3UVlNQmFBRk9UL05rSngKZ2xVZlVB
+            YXA1YWZYY0Q3MXNUQXBNQ1FHQTFVZEVRUWRNQnVDR1dOaExYUnZiMnh6TFRnMFkyTTVOVGM0WkRZ
+            dApNamh0Y1Rrd2dZc0dDQ29EQkFVR0J3Z0JCSDk3SW1GMGRISnpJanA3SW1GaVlXTXVhVzVwZENJ
+            NkluUnlkV1VpCkxDSmhaRzFwYmlJNkluUnlkV1VpTENKb1ppNUJabVpwYkdsaGRHbHZiaUk2SWlJ
+            c0ltaG1Ma1Z1Y205c2JHMWwKYm5SSlJDSTZJa0ZrYldsdVFHOXlaekV0WlhoaGJYQnNaUzFqYjIw
+            aUxDSm9aaTVVZVhCbElqb2lZMnhwWlc1MApJbjE5TUFvR0NDcUdTTTQ5QkFNQ0EwZ0FNRVVDSVFE
+            STlMbW5EeUhiQjFJWjFoenU3WVo1Und4OXlTQ0c0QStUCkx1QXhVQjBvSkFJZ1Z2QWdzbmNPYnF1
+            VEtBMjN6VE5aeUJhWTZjWkFkdHVzVE5nTVhHZ1lGOFk9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0t
+            LS0KQg4KBFNIQTISBlNIQTI1NkqOBi0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLQpNSUlDRXpD
+            Q0FibWdBd0lCQWdJSkFNcXBEcXFhbXpER01Bb0dDQ3FHU000OUJBTUNNRzB4Q3pBSkJnTlZCQVlU
+            CkFrbE9NUlF3RWdZRFZRUUlEQXROWVdoaGNtRnphSFJ5WVRFUE1BMEdBMVVFQnd3R1RYVnRZbUZw
+            TVJrd0Z3WUQKVlFRS0RCQnZjbWN4TFdWNFlXMXdiR1V0WTI5dE1Sd3dHZ1lEVlFRRERCTmpZUzV2
+            Y21jeExXVjRZVzF3YkdVdApZMjl0TUI0WERURTVNREV3TXpFeU5EQXdNRm9YRFRJeE1UQXlNekV5
+            TkRBd01Gb3diVEVMTUFrR0ExVUVCaE1DClNVNHhGREFTQmdOVkJBZ01DMDFoYUdGeVlYTm9kSEpo
+            TVE4d0RRWURWUVFIREFaTmRXMWlZV2t4R1RBWEJnTlYKQkFvTUVHOXlaekV0WlhoaGJYQnNaUzFq
+            YjIweEhEQWFCZ05WQkFNTUUyTmhMbTl5WnpFdFpYaGhiWEJzWlMxagpiMjB3V1RBVEJnY3Foa2pP
+            UFFJQkJnZ3Foa2pPUFFNQkJ3TkNBQVNYVEsxcXNxRVl5aEZBeDBvRHdEMXZNL3BOCitoaHI0d2NJ
+            RmtxYWNtSzRZZUxaTEpFWDlXUlRFWmNva2tXUWgxc2Y2TGxCNmowYWJRekxtWWl5ZmRabm8wSXcK
+            UURBUEJnTlZIUk1CQWY4RUJUQURBUUgvTUE0R0ExVWREd0VCL3dRRUF3SUJwakFkQmdOVkhRNEVG
+            Z1FVNVA4MgpRbkdDVlI5UUJxbmxwOWR3UHZXeE1Da3dDZ1lJS29aSXpqMEVBd0lEU0FBd1JRSWdO
+            ZTRxMWRORTVOaTlVQWhTCkpkeW5qa0h4MmRiMmZON3dmSEpEc2ErRExlNENJUUMrYisyWi80ekpD
+            Ty9YQXljVm5LVDlHZHhoR2o5UDMrWWUKRkEyY01hZW02QT09Ci0tLS0tRU5EIENFUlRJRklDQVRF
+            LS0tLS0KGgZBZG1pbnMiMAoHV3JpdGVycxIlEhsIARIXEggSBggBEgIIABoLEgkKB09yZzFNU1Aa
+            BkFkbWlucyIxCgZBZG1pbnMSJxIdCAESGRIIEgYIARICCAAaDRILCgdPcmcxTVNQEAEaBkFkbWlu
+            cyIwCgdSZWFkZXJzEiUSGwgBEhcSCBIGCAESAggAGgsSCQoHT3JnMU1TUBoGQWRtaW5zKgZBZG1p
+            bnMSwBYKB09yZzJNU1AStBYakhUKA01TUBKKFRL/FBL8FAoHT3JnMk1TUBKOBi0tLS0tQkVHSU4g
+            Q0VSVElGSUNBVEUtLS0tLQpNSUlDRkRDQ0FibWdBd0lCQWdJSkFNWE5JY2dSRUIyRk1Bb0dDQ3FH
+            U000OUJBTUNNRzB4Q3pBSkJnTlZCQVlUCkFrbE9NUlF3RWdZRFZRUUlEQXROWVdoaGNtRnphSFJ5
+            WVRFUE1BMEdBMVVFQnd3R1RYVnRZbUZwTVJrd0Z3WUQKVlFRS0RCQnZjbWN5TFdWNFlXMXdiR1V0
+            WTI5dE1Sd3dHZ1lEVlFRRERCTmpZUzV2Y21jeUxXVjRZVzF3YkdVdApZMjl0TUI0WERURTVNREV3
+            TXpFeU5EQXhNMW9YRFRJeE1UQXlNekV5TkRBeE0xb3diVEVMTUFrR0ExVUVCaE1DClNVNHhGREFT
+            QmdOVkJBZ01DMDFoYUdGeVlYTm9kSEpoTVE4d0RRWURWUVFIREFaTmRXMWlZV2t4R1RBWEJnTlYK
+            QkFvTUVHOXlaekl0WlhoaGJYQnNaUzFqYjIweEhEQWFCZ05WQkFNTUUyTmhMbTl5WnpJdFpYaGhi
+            WEJzWlMxagpiMjB3V1RBVEJnY3Foa2pPUFFJQkJnZ3Foa2pPUFFNQkJ3TkNBQVN4Q1lxLzEwd1dU
+            N0RXRzNib0t1eXdLQUtrCllORXh6a1lnRFBjaWN5VVVMTHdhc29vRVlQRm5vMzdYWklBUlhSdGt2
+            MURTYlo4S2luSWZvWU5tSmdrNG8wSXcKUURBUEJnTlZIUk1CQWY4RUJUQURBUUgvTUE0R0ExVWRE
+            d0VCL3dRRUF3SUJwakFkQmdOVkhRNEVGZ1FVKzgvWApRWE5NTjdtMkpXSnU1RTBLVnRRaWx1d3dD
+            Z1lJS29aSXpqMEVBd0lEU1FBd1JnSWhBTzRqL0YrWWM3UTNnSE1hCjBySUlqc3E3WGllMEJiS3Fz
+            dlluRHJrUHNhemZBaUVBbkJ3WVFhWVppby84WHA4TjZnb2dlWS8rckhMVDBTQlgKY2l4K3czU2pV
+            dFU9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0KIr4ILS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0t
+            LS0tCk1JSUM5VENDQXB1Z0F3SUJBZ0lVRHVlZndWc1Q3U0tQZmNGUVhDazIxTnp4eEZBd0NnWUlL
+            b1pJemowRUF3SXcKYlRFTE1Ba0dBMVVFQmhNQ1NVNHhGREFTQmdOVkJBZ01DMDFoYUdGeVlYTm9k
+            SEpoTVE4d0RRWURWUVFIREFaTgpkVzFpWVdreEdUQVhCZ05WQkFvTUVHOXlaekl0WlhoaGJYQnNa
+            UzFqYjIweEhEQWFCZ05WQkFNTUUyTmhMbTl5Clp6SXRaWGhoYlhCc1pTMWpiMjB3SGhjTk1Ua3dN
+            VEF6TVRJME9EQXdXaGNOTWpBd01UQXpNVEkxTXpBd1dqQnUKTVFzd0NRWURWUVFHRXdKVlV6RVhN
+            QlVHQTFVRUNCTU9UbTl5ZEdnZ1EyRnliMnhwYm1FeEZEQVNCZ05WQkFvVApDMGg1Y0dWeWJHVmta
+            MlZ5TVE4d0RRWURWUVFMRXdaamJHbGxiblF4SHpBZEJnTlZCQU1NRmtGa2JXbHVRRzl5Clp6SXRa
+            WGhoYlhCc1pTMWpiMjB3V1RBVEJnY3Foa2pPUFFJQkJnZ3Foa2pPUFFNQkJ3TkNBQVM5M1VUT1Fh
+            VGoKZyttcU5jUzUxQnhvaFJZNFgwVE1wVHBkK0hrcHFlazl0UmNQZ3lSVHF3UmhwOVJWK0NaUVhH
+            V2tSVWI5MllMZwpUNGMvY0dSeWovUWRvNElCRmpDQ0FSSXdEZ1lEVlIwUEFRSC9CQVFEQWdlQU1B
+            d0dBMVVkRXdFQi93UUNNQUF3CkhRWURWUjBPQkJZRUZQWlVBSFVlTlRNUW9vUERUVzJxampRWG4y
+            NnBNQjhHQTFVZEl3UVlNQmFBRlB2UDEwRnoKVERlNXRpVmlidVJOQ2xiVUlwYnNNQ1FHQTFVZEVR
+            UWRNQnVDR1dOaExYUnZiMnh6TFRnMFkyTTVOVGM0WkRZdApabmhzZEdJd2dZc0dDQ29EQkFVR0J3
+            Z0JCSDk3SW1GMGRISnpJanA3SW1GaVlXTXVhVzVwZENJNkluUnlkV1VpCkxDSmhaRzFwYmlJNklu
+            UnlkV1VpTENKb1ppNUJabVpwYkdsaGRHbHZiaUk2SWlJc0ltaG1Ma1Z1Y205c2JHMWwKYm5SSlJD
+            STZJa0ZrYldsdVFHOXlaekl0WlhoaGJYQnNaUzFqYjIwaUxDSm9aaTVVZVhCbElqb2lZMnhwWlc1
+            MApJbjE5TUFvR0NDcUdTTTQ5QkFNQ0EwZ0FNRVVDSVFDdjNrZ3ZxTXB5K21ib3BRaGhKLzdiTE50
+            L0lOcExiRU9sClErMi9HMzI1dXdJZ0x3V3VVOFBBaXdKSHd4Q3doWkVtWlloUFR5NExDb0RVTlV2
+            V3VFVmdKT3M9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0KQg4KBFNIQTISBlNIQTI1NkqOBi0t
+            LS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLQpNSUlDRkRDQ0FibWdBd0lCQWdJSkFNWE5JY2dSRUIy
+            Rk1Bb0dDQ3FHU000OUJBTUNNRzB4Q3pBSkJnTlZCQVlUCkFrbE9NUlF3RWdZRFZRUUlEQXROWVdo
+            aGNtRnphSFJ5WVRFUE1BMEdBMVVFQnd3R1RYVnRZbUZwTVJrd0Z3WUQKVlFRS0RCQnZjbWN5TFdW
+            NFlXMXdiR1V0WTI5dE1Sd3dHZ1lEVlFRRERCTmpZUzV2Y21jeUxXVjRZVzF3YkdVdApZMjl0TUI0
+            WERURTVNREV3TXpFeU5EQXhNMW9YRFRJeE1UQXlNekV5TkRBeE0xb3diVEVMTUFrR0ExVUVCaE1D
+            ClNVNHhGREFTQmdOVkJBZ01DMDFoYUdGeVlYTm9kSEpoTVE4d0RRWURWUVFIREFaTmRXMWlZV2t4
+            R1RBWEJnTlYKQkFvTUVHOXlaekl0WlhoaGJYQnNaUzFqYjIweEhEQWFCZ05WQkFNTUUyTmhMbTl5
+            WnpJdFpYaGhiWEJzWlMxagpiMjB3V1RBVEJnY3Foa2pPUFFJQkJnZ3Foa2pPUFFNQkJ3TkNBQVN4
+            Q1lxLzEwd1dUN0RXRzNib0t1eXdLQUtrCllORXh6a1lnRFBjaWN5VVVMTHdhc29vRVlQRm5vMzdY
+            WklBUlhSdGt2MURTYlo4S2luSWZvWU5tSmdrNG8wSXcKUURBUEJnTlZIUk1CQWY4RUJUQURBUUgv
+            TUE0R0ExVWREd0VCL3dRRUF3SUJwakFkQmdOVkhRNEVGZ1FVKzgvWApRWE5NTjdtMkpXSnU1RTBL
+            VnRRaWx1d3dDZ1lJS29aSXpqMEVBd0lEU1FBd1JnSWhBTzRqL0YrWWM3UTNnSE1hCjBySUlqc3E3
+            WGllMEJiS3FzdlluRHJrUHNhemZBaUVBbkJ3WVFhWVppby84WHA4TjZnb2dlWS8rckhMVDBTQlgK
+            Y2l4K3czU2pVdFU9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0KGgZBZG1pbnMiMQoGQWRtaW5z
+            EicSHQgBEhkSCBIGCAESAggAGg0SCwoHT3JnMk1TUBABGgZBZG1pbnMiMAoHUmVhZGVycxIlEhsI
+            ARIXEggSBggBEgIIABoLEgkKB09yZzJNU1AaBkFkbWlucyIwCgdXcml0ZXJzEiUSGwgBEhcSCBIG
+            CAESAggAGgsSCQoHT3JnMk1TUBoGQWRtaW5zKgZBZG1pbnMaQAoVQ2hhbm5lbENyZWF0aW9uUG9s
+            aWN5EicSDAgDEggKBkFkbWlucxoXL0NoYW5uZWwvT3JkZXJlci9BZG1pbnMqFy9DaGFubmVsL09y
+            ZGVyZXIvQWRtaW5zIi0KBkFkbWlucxIjEggIARIEEgISABoXL0NoYW5uZWwvT3JkZXJlci9BZG1p
+            bnMqFy9DaGFubmVsL09yZGVyZXIvQWRtaW5zGi0KGUJsb2NrRGF0YUhhc2hpbmdTdHJ1Y3R1cmUS
+            EBIGCP////8PGgZBZG1pbnMaSQoQT3JkZXJlckFkZHJlc3NlcxI1EhoKGG9yZGVyZXIuZXhhbXBs
+            ZS1jb206NzA1MBoXL0NoYW5uZWwvT3JkZXJlci9BZG1pbnMaJAoMQ2FwYWJpbGl0aWVzEhQSCgoI
+            CgRWMV8xEgAaBkFkbWlucxomChBIYXNoaW5nQWxnb3JpdGhtEhISCAoGU0hBMjU2GgZBZG1pbnMi
+            IgoGQWRtaW5zEhgSDggDEgoKBkFkbWlucxACGgZBZG1pbnMiIgoHUmVhZGVycxIXEg0IAxIJCgdS
+            ZWFkZXJzGgZBZG1pbnMiIgoHV3JpdGVycxIXEg0IAxIJCgdXcml0ZXJzGgZBZG1pbnMqBkFkbWlu
+            cxoICgAKAAoACgA=

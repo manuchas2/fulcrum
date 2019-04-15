@@ -1,0 +1,6 @@
+- name: "join channels"
+  include_tasks: nested_loop.yaml 
+  vars: 
+    channel: "{{ item.value }}"
+    channel_name: "{{ item.key }}" 
+  loop: "{{ dlt['hyperledger-fabric']['channels'] | default({}) | dict2items }}"

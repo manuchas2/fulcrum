@@ -1,0 +1,9 @@
+- name: "create peers"
+  include_role:
+    name: dlt_component
+  vars:
+    component_name: "{{ item.key }}"
+    component_config: "{{ item.value['config'] }}"
+    platform: "hyperledger-fabric"
+    type: "peers"
+  loop: "{{ dlt['hyperledger-fabric']['peers'] | default({}) | dict2items }}"

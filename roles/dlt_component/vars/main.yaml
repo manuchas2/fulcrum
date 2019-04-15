@@ -1,0 +1,38 @@
+helm_home: /root/.helm
+config_file: /root/.kube/config
+helm_cmd: /usr/local/bin/helm
+values_dir: /root/helm/values
+
+dlt_templates:
+  orderers: orderernode.tpl
+  create_channel_job: create_channel_job.tpl
+  join_channel_job: join_channel_job.tpl
+  install_chaincode_job: install_chaincode_job.tpl
+  instantiate_chaincode_job: instantiate_chaincode_job.tpl
+
+charts:
+  peers: 
+    chart_name: local/peernode
+    version: 0.1.0
+  orderers: 
+    chart_name: local/orderernode
+    version: 0.1.0
+  zkkafka:
+    chart_name: local/zkKafka
+    version: 0.1.0
+  cas: 
+    chart_name: local/ca
+    version: 0.1.0
+  create_channel_job: 
+    chart_name: local/create_channel
+    version: 0.1.0
+  join_channel_job:
+    chart_name: local/join_channel
+    version: 0.1.0
+  install_chaincode_job:
+    chart_name: local/install_chaincode
+    version: 0.1.0
+  instantiate_chaincode_job:
+    chart_name: local/instantiate_chaincode
+    version: 0.1.0
+namespace: default

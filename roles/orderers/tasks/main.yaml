@@ -1,0 +1,20 @@
+- name: "create kafka clusters"
+  include_role:
+    name: dlt_component
+  vars:
+    component_name: "{{ item.key }}"
+    component_config: "{{ item.value['config'] }}"
+    platform: "hyperledger-fabric"
+    type: "zkkafka"
+  loop: "{{ dlt['hyperledger-fabric']['zkkafka'] | default({}) | dict2items }}"
+
+- name: "create orderers"
+  include_role:
+    name: dlt_component
+  vars:
+    component_name: "{{ item.key }}"
+    component_config: "{{ item.value['config'] }}"
+    platform: "hyperledger-fabric"
+    type: "orderers"
+  loop: "{{ dlt['hyperledger-fabric']['orderers'] | default({}) | dict2items }}"
+  

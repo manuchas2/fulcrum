@@ -1,0 +1,7 @@
+---
+dependencies:
+  - role: peers
+  - role: orderers
+  - role: channels_create
+  - role: channels_join
+  - role: chaincodes_install

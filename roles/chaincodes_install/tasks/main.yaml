@@ -1,0 +1,6 @@
+- name: "install chaincodes"
+  include_tasks: nested_loop.yaml 
+  vars: 
+    chaincode: "{{ item.value }}"
+    chaincode_name: "{{ item.key }}" 
+  loop: "{{ dlt['hyperledger-fabric']['chaincodes'] | default({}) | dict2items }}"

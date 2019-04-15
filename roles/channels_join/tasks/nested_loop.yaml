@@ -1,0 +1,13 @@
+- name: "join channel {{ channel_name }}"
+  include_role:
+    name: dlt_component
+  vars:
+    component_name: "join-{{ channel_name }}-{{ channelpeer }}"
+    component_config: "{{ channel['config'] }}"
+    platform: "hyperledger-fabric"
+    type: "join_channel_job"
+  loop: "{{ channel['config']['peers'] }}"
+  loop_control: 
+    loop_var: channelpeer
+
+  

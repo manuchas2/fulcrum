@@ -1,0 +1,11 @@
+- name: "install chaincode {{ chaincode_name }}"
+  include_role:
+    name: dlt_component
+  vars:
+    component_name: "install-{{ chaincode_name }}-{{ chaincodepeer['name'] }}"
+    component_config: "{{ chaincode['config'] }}"
+    platform: "hyperledger-fabric"
+    type: "install_chaincode_job"
+  loop: "{{ chaincode['config']['peers'] }}"
+  loop_control: 
+    loop_var: chaincodepeer
