@@ -20,3 +20,8 @@ kafka:
 genesis: |-
   {{ config.genesis | indent(2) }}
 {% endif %}
+{%- if config.ambassador is defined %}
+ambassador:
+  annotations: |-
+    {{ config.ambassador.annotations | indent(4) }}
+{% endif %}
