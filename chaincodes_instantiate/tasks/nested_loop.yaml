@@ -1,7 +1,0 @@
-- name: "instantiate chaincode {{ chaincode_name }}"
-  include_role:
-    name: dlt_component
-  loop_control: 
-    loop_var: chaincodechannel
-
-  

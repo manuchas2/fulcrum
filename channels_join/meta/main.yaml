@@ -1,5 +1,0 @@
----
-dependencies:
-  - role: peers
-  - role: orderers
-  - role: channels_create

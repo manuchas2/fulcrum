@@ -1,3 +1,0 @@
-- name: "create channels"
-  include_role:
-    name: dlt_component
