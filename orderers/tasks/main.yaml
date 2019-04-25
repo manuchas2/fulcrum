@@ -1,0 +1,3 @@
+- name: "create kafka clusters"
+  include_role:
+    name: dlt_component

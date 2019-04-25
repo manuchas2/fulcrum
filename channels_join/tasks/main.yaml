@@ -1,0 +1,2 @@
+- name: "join channels"
+  include_tasks: nested_loop.yaml 

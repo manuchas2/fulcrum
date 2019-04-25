@@ -1,0 +1,6 @@
+---
+- name: Ensures {{ values_dir }} dir exists
+  file:
+    path: "{{ values_dir }}"
+    recurse: yes
+    state: directory
